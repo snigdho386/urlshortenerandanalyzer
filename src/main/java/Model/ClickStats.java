@@ -3,6 +3,7 @@ package Model;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import Model.ShortUrl;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;

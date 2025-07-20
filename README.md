@@ -19,6 +19,7 @@ A Spring Boot application that provides URL shortening functionality with click 
 - **Build Tool**: Maven
 - **Java Version**: 21
 - **Lombok**: For reducing boilerplate code
+- **Testing**: JUnit 5, Mockito, Spring Boot Test, H2 Database
 
 ## 📋 Prerequisites
 
@@ -121,9 +122,161 @@ src/
 
 ## 🧪 Testing
 
-Run tests using Maven:
+This project includes comprehensive test coverage across all layers of the application. The testing strategy follows the testing pyramid with unit tests, integration tests, and repository tests.
+
+### 🏃‍♂️ Running Tests
+
+#### Run All Tests
 ```bash
 ./mvnw test
+```
+
+#### Run Specific Test Classes
+```bash
+# Service layer tests
+./mvnw test -Dtest="Service.UrlServiceTest"
+
+# Repository tests
+./mvnw test -Dtest="Repository.ShortUrlRepositoryTest"
+./mvnw test -Dtest="Repository.ClickStatsRepositoryTest"
+
+# Controller tests
+./mvnw test -Dtest="Controller.UrlControllerTest"
+```
+
+#### Run Tests with Coverage Report
+```bash
+./mvnw test jacoco:report
+```
+
+### 📋 Test Structure
+
+```
+src/test/
+├── java/
+│   ├── Service/
+│   │   └── UrlServiceTest.java              # Service layer unit tests
+│   ├── Controller/
+│   │   └── UrlControllerTest.java           # Controller integration tests
+│   └── Repository/
+│       ├── ShortUrlRepositoryTest.java      # URL repository tests
+│       └── ClickStatsRepositoryTest.java    # Click stats repository tests
+└── resources/
+    └── application-test.properties          # Test-specific configuration
+```
+
+### 🧪 Test Categories
+
+#### 1. Service Layer Tests (`UrlServiceTest.java`)
+**Purpose**: Unit tests for business logic
+**Coverage**: 8 test methods
+- ✅ URL creation with unique short codes
+- ✅ Duplicate short code handling
+- ✅ URL retrieval and redirection
+- ✅ Click statistics recording
+- ✅ Statistics retrieval
+- ✅ Error handling for invalid short codes
+- ✅ Empty URL list handling
+- ✅ Statistics for non-existent URLs
+
+**Key Features**:
+- Uses Mockito for mocking dependencies
+- Tests all public methods in UrlService
+- Validates business logic in isolation
+- Covers edge cases and error scenarios
+
+#### 2. Repository Layer Tests
+**Purpose**: Integration tests for database operations
+
+**ShortUrlRepositoryTest.java**:
+- ✅ Entity persistence and retrieval
+- ✅ Custom finder methods
+- ✅ Unique constraint validation
+- ✅ Timestamp initialization
+- ✅ Relationship handling
+
+**ClickStatsRepositoryTest.java**:
+- ✅ Click statistics persistence
+- ✅ Relationship with ShortUrl entity
+- ✅ Optional field handling
+- ✅ Timestamp management
+- ✅ Data integrity validation
+
+#### 3. Controller Layer Tests (`UrlControllerTest.java`)
+**Purpose**: Integration tests for REST endpoints
+**Coverage**: 6 test methods
+- ✅ POST /shorten endpoint
+- ✅ GET /{shortCode} redirect endpoint
+- ✅ GET /urls endpoint
+- ✅ GET /stats/{code} endpoint
+- ✅ Error handling for invalid requests
+- ✅ Response format validation
+
+**Key Features**:
+- Uses MockMvc for HTTP request simulation
+- Tests JSON request/response handling
+- Validates HTTP status codes
+- Tests endpoint behavior with mocked services
+
+### 🔧 Test Configuration
+
+#### Test Database
+Tests use H2 in-memory database for fast execution:
+```properties
+# src/test/resources/application-test.properties
+spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.driver-class-name=org.h2.Driver
+spring.jpa.hibernate.ddl-auto=create-drop
+```
+
+#### Test Annotations
+- `@DataJpaTest`: For repository tests with embedded database
+- `@ExtendWith(MockitoExtension.class)`: For unit tests with Mockito
+- `@WebMvcTest`: For controller tests with MockMvc
+- `@ContextConfiguration`: For specifying test configuration
+
+### 📊 Test Coverage Metrics
+
+| Layer | Test Class | Methods | Status |
+|-------|------------|---------|--------|
+| Service | UrlServiceTest | 8 | ✅ Passing |
+| Repository | ShortUrlRepositoryTest | 5 | ✅ Passing |
+| Repository | ClickStatsRepositoryTest | 4 | ✅ Passing |
+| Controller | UrlControllerTest | 6 | ✅ Passing |
+| **Total** | **4 Classes** | **23 Methods** | **✅ All Passing** |
+
+### 🎯 Test Best Practices Implemented
+
+1. **Arrange-Act-Assert Pattern**: All tests follow the AAA pattern
+2. **Descriptive Test Names**: Method names clearly describe what is being tested
+3. **Isolation**: Each test is independent and doesn't affect others
+4. **Mocking**: External dependencies are properly mocked
+5. **Edge Cases**: Tests cover both happy path and error scenarios
+6. **Documentation**: Each test method includes detailed comments
+
+### 🚀 Running Tests in CI/CD
+
+For continuous integration, the tests can be run with:
+```bash
+# Clean build and test
+./mvnw clean test
+
+# Run tests with verbose output
+./mvnw test -X
+
+# Run tests and generate reports
+./mvnw test jacoco:report surefire-report:report
+```
+
+### 🔍 Debugging Tests
+
+To debug failing tests:
+```bash
+# Run specific test with debug output
+./mvnw test -Dtest="Service.UrlServiceTest#createShortUrl_ShouldCreateValidShortUrl" -X
+
+# Run tests with detailed logging
+./mvnw test -Dlogging.level.org.springframework.test=DEBUG
 ```
 
 ## 📊 Database Schema
